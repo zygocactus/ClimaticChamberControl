@@ -6,7 +6,7 @@ using System.Windows.Forms;
 
 namespace ClimaticChamberControl_Programm
 {
-    static class Start
+    static class Init
     {
         /// <summary>
         /// Der Haupteinstiegspunkt für die Anwendung.
