@@ -5,8 +5,54 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ClimaticChamberControl_GUI"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
+        Title="MainWindow" Height="450" Width="350">
     <Grid>
+            <GroupBox x:Name="istwerte" Header="IST" HorizontalAlignment="Center" Height="130" VerticalAlignment="Top" Width="265">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <Label Grid.Column="0" Grid.Row="0" x:Name="label" Content="Temperatur:" HorizontalAlignment="Right" VerticalAlignment="Center" Width="76"/>
+                <Label Grid.Column="0" Grid.Row="1" x:Name="label1" Content="relative Luftfeuchte:" HorizontalAlignment="Right" VerticalAlignment="Center" Width="119"/>
+                <Label Grid.Column="0" Grid.Row="2" x:Name="label2" Content="Absolute Luftfeuche:" HorizontalAlignment="Right" VerticalAlignment="Center" Width="124"/>
+                <Label Grid.Column="2" Grid.Row="0" x:Name="label3" Content="°C" HorizontalAlignment="Left" VerticalAlignment="Center" Width="23"/>
+                <Label Grid.Column="2" Grid.Row="1" x:Name="label4" Content="%" HorizontalAlignment="Left" VerticalAlignment="Center" Width="21"/>
+                <Label Grid.Column="2" Grid.Row="2" x:Name="label5" Content="g/m³" HorizontalAlignment="Left" VerticalAlignment="Center" Width="38"/>
+                <Label Grid.Column="1" Grid.Row="0" x:Name="temp" Content="" HorizontalAlignment="Left" VerticalAlignment="Center"  Width="55"/>
+                <Label Grid.Column="1" Grid.Row="1" x:Name="rhumi" Content="" HorizontalAlignment="Left" VerticalAlignment="Center" Width="55"/>
+                <Label Grid.Column="1" Grid.Row="2" x:Name="abshumi" Content="" HorizontalAlignment="Left" VerticalAlignment="Center" Width="55"/>
+
+            </Grid>
+        </GroupBox>
+
+        <GroupBox x:Name="sollwerte" Header="SOLL" HorizontalAlignment="Center" Height="130" VerticalAlignment="Center" Width="265">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="1*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <Label Grid.Column="0" Grid.Row="0" x:Name="label6" Content="Temperatur [°C]:" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                <TextBox Grid.Column="1" Grid.Row="0" x:Name="SollTemp" HorizontalAlignment="Left" VerticalAlignment="Center" Height="23" Width="60"/>
+                <Label Grid.Column="0" Grid.Row="1" x:Name="label7" Content="Absolute Luftfeuchte [g/m³]:" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                <TextBox Grid.Column="1" Grid.Row="1" x:Name="SollAF" HorizontalAlignment="Left" VerticalAlignment="Center" Height="23" Width="60"/>
+            </Grid>
+        </GroupBox>
         
+        <Button x:Name="start" Content="Start" HorizontalAlignment="Left" Margin="204,349,0,0" VerticalAlignment="Top" Width="100" Height="40"/>
+        <Button x:Name="connect" Content="Verbinden" HorizontalAlignment="Left" Margin="38,349,0,0" VerticalAlignment="Top" Width="100" Height="40"/>
+        <Label x:Name="label8" Content="Speicherort:" HorizontalAlignment="Left" Margin="38,281,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="SaveLocation" HorizontalAlignment="Left" Height="23" Margin="38,307,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="266"/>
+
     </Grid>
 </Window>
