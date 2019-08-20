@@ -7,7 +7,7 @@ using System.IO.Ports;
 
 namespace ClimaticChamberControl_Programm
 {
-    class SerialInterfaceController
+    class SerialInterfaceController//steam generation controll and sensordata
     {
         string[] dataTH;
         string[] da;
@@ -30,6 +30,7 @@ namespace ClimaticChamberControl_Programm
 
         public void actDA()// updating GUI Label
         {
+            
             while (true)
             {
                 string dataraw = "";
@@ -37,10 +38,11 @@ namespace ClimaticChamberControl_Programm
                 {
                     ComPortUSB.NewLine = "DA";
                     dataraw = ComPortUSB.ReadLine();
-
                 }
                 dataTH = dataraw.Split(' ');
 
+
+                //ComPortUSB.WriteLine("on");//Sendetest:an jeden Befehl wird als Ende 'DA' angefügt
 
                 for (int i = 0; i < 2; i++)
                 {
