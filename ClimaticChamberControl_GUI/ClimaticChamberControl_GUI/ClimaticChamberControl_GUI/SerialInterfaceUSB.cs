@@ -20,10 +20,11 @@ namespace ClimaticChamberControl_GUI
             get;
         }
 
-        public SerialInterfaceUSB(CCC_MainWindow guiLink)
+        public SerialInterfaceUSB(CCC_MainWindow guiLink)//fpr object updating
         {
             GUILink = guiLink;
         }
+        
 
         SerialPort ComPortUSB = new SerialPort("COM7", 115200, Parity.None, 8, StopBits.One); // ComCort generating
 

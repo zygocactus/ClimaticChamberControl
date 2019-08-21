@@ -14,6 +14,10 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Threading;
 using System.Windows.Threading;
+using System.Diagnostics;
+using System.IO;
+using Microsoft.Win32;
+using WinForms = System.Windows.Forms;
 
 namespace ClimaticChamberControl_GUI
 {
@@ -23,11 +27,14 @@ namespace ClimaticChamberControl_GUI
     public partial class CCC_MainWindow : Window
     {
         SerialInterfaceUSB sic;
+        DataStore ds;
+        
 
         public CCC_MainWindow()
         {
             InitializeComponent();
             sic = new SerialInterfaceUSB(this);
+            ds = new DataStore();
         }
 
         private void Connect_Click(object sender, EventArgs e)
@@ -40,14 +47,40 @@ namespace ClimaticChamberControl_GUI
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                System.Windows.MessageBox.Show(ex.Message);
             }
         }
         private void Start_Click(object sender, EventArgs e)
         {
-
+            //creating txt file
+            //Start DataStore -> write to txt
+            //start PID controller 
         }
+        public void FileExplorer_Click(object sender, EventArgs e)
+        {
+            WinForms.FolderBrowserDialog folderDialog = new WinForms.FolderBrowserDialog();
+            folderDialog.ShowNewFolderButton = true;
+            folderDialog.SelectedPath = System.AppDomain.CurrentDomain.BaseDirectory;
+            WinForms.DialogResult result = folderDialog.ShowDialog();
+            
+            if (result == WinForms.DialogResult.OK)
+            {
+                ds.Path = folderDialog.SelectedPath;
+                SaveLocation.Text = ds.Path;
+            }
 
+            //OpenFileDialog openFileDialog = new OpenFileDialog();
+            //openFileDialog.Multiselect = false;
+            //openFileDialog.InitialDirectory = @"c:\temp\";
+            //openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            //if (openFileDialog.ShowDialog() == true)
+            //{
+            //    string filename = openFileDialog.FileName;
+            //    SaveLocation.Text = filename;
+            //}
+        }
+        
+        
         public string Temperature
         {
             get
@@ -90,11 +123,12 @@ namespace ClimaticChamberControl_GUI
                     this.abshumi.Content = value;
                 else
                     Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(() => this.abshumi.Content = value));
-                //if (abshumi.InvokeRequired)
-                //    this.Invoke(new MethodInvoker(() => abshumi.Content = value));
-                //else
-                //    this.abshumi.Content = value;
             }
+        }
+        private static void OpenExplorer(string path)
+        {
+            if (Directory.Exists(path))
+                System.Diagnostics.Process.Start("explorer.exe", path);
         }
     }
 }

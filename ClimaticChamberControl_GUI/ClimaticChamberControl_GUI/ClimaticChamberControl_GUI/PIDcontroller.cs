@@ -8,5 +8,65 @@ namespace ClimaticChamberControl_GUI
 {
     class PIDcontroller
     {
+
+        //general equation
+        //Kp = Proportionalbeiwert; Ki = Integrierbeiwert; Kd = Differenzierbeiwert 
+        //w -> Istwert
+        //x -> Sollwert
+        //e -> Regelabweichung
+        //y -> Stellgröße
+        //Ta -> Abtastzeit
+        //
+        //e = w - x;					                    //Vergleich
+        //esum = esum + e;				                    //Integration I-Anteil
+        //y = Kp* e + Ki* Ta*esum + Kd/Ta*(e – ealt);	    //Reglergleichung
+        //ealt = e;
+
+        //for temperature controll
+        double et;//system deviation
+        double etsum;//system deviation summe
+        double etold;//old system deviation
+        double wt;//actual value
+        double xt;//set value
+        double yt;//actuating value
+        double Tat;//sampling time
+        double Kpt;//P coefficient
+        double Kit;//I coefficient
+        double Kdt;//D coefficient
+        //for humidity controll
+        double eh;//system deviation
+        double ehsum;//system deviation summe
+        double ehold;//old system deviation
+        double wh;//actual value
+        double xh;//set value
+        double yh;//actuating value
+        double Tah;//sampling time
+        double Kph;//P coefficient
+        double Kih;//I coefficient
+        double Kdh;//D coefficient
+
+        public void TemperatureControl()
+        {
+
+            //Temperature PID controller
+            et = wt - xt;
+            etsum = etsum + et;
+            yt = (Kpt* et) + (Kit* Tat * etsum) + (Kdt / Tat * (et - etold));
+            etold = et;
+
+
+
+        }
+
+        public void HumidityControl()
+        {
+
+            //Humidity(absolute) PID controller
+            eh = wh - xh;
+            ehsum = ehsum + eh;
+            yh = (Kph * eh) + (Kih * Tah * ehsum) + (Kdh / Tah * (eh - ehold));
+            ehold = eh;
+
+        }
     }
 }

@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="ClimatcChamberControl V0.1.0" Height="450" Width="350">
     <Grid>
-            <GroupBox x:Name="istwerte" Header="IST" HorizontalAlignment="Center" Height="130" VerticalAlignment="Top" Width="265">
+        <GroupBox x:Name="istwerte" Header="IST" HorizontalAlignment="Center" Height="130" VerticalAlignment="Top" Width="265">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="2*"/>
@@ -52,7 +52,8 @@
         <Button x:Name="Start" Content="Start" Click="Start_Click" HorizontalAlignment="Left" Margin="204,349,0,0" VerticalAlignment="Top" Width="100" Height="40"/>
         <Button x:Name="Connect" Click="Connect_Click" Content="Verbinden" HorizontalAlignment="Left" Margin="38,349,0,0" VerticalAlignment="Top" Width="100" Height="40"/>
         <Label x:Name="label8" Content="Speicherort:" HorizontalAlignment="Left" Margin="38,281,0,0" VerticalAlignment="Top"/>
-        <TextBox x:Name="SaveLocation" HorizontalAlignment="Left" Height="23" Margin="38,307,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="266"/>
+        <TextBox x:Name="SaveLocation" HorizontalAlignment="Left" Text="" Height="23" Margin="38,307,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="233"/>
+        <Button x:Name="FileExplorer" Click="FileExplorer_Click" Content="..." HorizontalAlignment="Left" Margin="276,307,0,0" VerticalAlignment="Top" Width="28" Height="23"/>
 
     </Grid>
 </Window>
