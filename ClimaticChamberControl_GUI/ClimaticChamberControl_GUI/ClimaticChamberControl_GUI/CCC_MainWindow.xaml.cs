@@ -28,13 +28,15 @@ namespace ClimaticChamberControl_GUI
     {
         SerialInterfaceUSB sic;
         DataStore ds;
-        
+        PIDcontroller pid;
 
         public CCC_MainWindow()
         {
             InitializeComponent();
-            sic = new SerialInterfaceUSB(this);
             ds = new DataStore();
+            sic = new SerialInterfaceUSB(this, ds);
+            ds.InOperation = false;
+            pid = new PIDcontroller();
         }
 
         private void Connect_Click(object sender, EventArgs e)
@@ -44,6 +46,9 @@ namespace ClimaticChamberControl_GUI
                 sic.Connect();
                 Thread thr = new Thread(new ThreadStart(sic.actDA));
                 thr.Start();
+                Connect.IsEnabled = false;
+                Start.IsEnabled = true;
+                Stop.IsEnabled = true;
             }
             catch (Exception ex)
             {
@@ -52,9 +57,28 @@ namespace ClimaticChamberControl_GUI
         }
         private void Start_Click(object sender, EventArgs e)
         {
-            //creating txt file
-            //Start DataStore -> write to txt
-            //start PID controller 
+            if (SollTemp.Text.ToString() == "")
+            {
+                System.Windows.MessageBox.Show("Es müssen noch SOLL-Werte gesetzt werden.");
+            }
+            else
+            {
+                ds.InOperation = true;
+                SollTemp.IsEnabled = false;
+                SollabsHumi.IsEnabled = false;
+                ds.GenerateFile();
+                ds.StoreDATA();
+                pid.SOLLtemp = SollTemp.Text.ToString();
+                pid.SOLLhumi = SollabsHumi.Text.ToString();
+                pid.ClimaticControl();
+            }
+        }
+        private void Stop_Click(object sender, EventArgs e)
+        {
+            ds.InOperation = false;
+            SollTemp.IsEnabled = true;
+            SollabsHumi.IsEnabled = true;
+            ds.writeTimer.Stop();//stop writing in parameter text file
         }
         public void FileExplorer_Click(object sender, EventArgs e)
         {
@@ -62,25 +86,19 @@ namespace ClimaticChamberControl_GUI
             folderDialog.ShowNewFolderButton = true;
             folderDialog.SelectedPath = System.AppDomain.CurrentDomain.BaseDirectory;
             WinForms.DialogResult result = folderDialog.ShowDialog();
-            
+
             if (result == WinForms.DialogResult.OK)
             {
                 ds.Path = folderDialog.SelectedPath;
                 SaveLocation.Text = ds.Path;
             }
-
-            //OpenFileDialog openFileDialog = new OpenFileDialog();
-            //openFileDialog.Multiselect = false;
-            //openFileDialog.InitialDirectory = @"c:\temp\";
-            //openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            //if (openFileDialog.ShowDialog() == true)
-            //{
-            //    string filename = openFileDialog.FileName;
-            //    SaveLocation.Text = filename;
-            //}
         }
-        
-        
+        private static void OpenExplorer(string path)
+        {
+            if (Directory.Exists(path))
+                System.Diagnostics.Process.Start("explorer.exe", path);
+        }
+
         public string Temperature
         {
             get
@@ -95,8 +113,7 @@ namespace ClimaticChamberControl_GUI
                     Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Background,new Action(() => this.temp.Content = value));
             }
         }
-
-        public string Humidity
+        public string RelativeHumidity
         {
             get
             {
@@ -110,7 +127,6 @@ namespace ClimaticChamberControl_GUI
                     Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(() => this.rhumi.Content = value));
             }
         }
-
         public string AbsoluteHumidity
         {
             get
@@ -125,10 +141,10 @@ namespace ClimaticChamberControl_GUI
                     Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(() => this.abshumi.Content = value));
             }
         }
-        private static void OpenExplorer(string path)
+
+        private void SollTemp_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (Directory.Exists(path))
-                System.Diagnostics.Process.Start("explorer.exe", path);
+
         }
     }
 }

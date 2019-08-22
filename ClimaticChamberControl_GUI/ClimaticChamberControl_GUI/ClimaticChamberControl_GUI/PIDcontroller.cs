@@ -8,7 +8,10 @@ namespace ClimaticChamberControl_GUI
 {
     class PIDcontroller
     {
+        public string SOLLtemp;
+        public string SOLLhumi;
 
+        
         //general equation
         //Kp = Proportionalbeiwert; Ki = Integrierbeiwert; Kd = Differenzierbeiwert 
         //w -> Istwert
@@ -45,7 +48,7 @@ namespace ClimaticChamberControl_GUI
         double Kih;//I coefficient
         double Kdh;//D coefficient
 
-        public void TemperatureControl()
+        private void TemperatureControl()
         {
 
             //Temperature PID controller
@@ -58,7 +61,7 @@ namespace ClimaticChamberControl_GUI
 
         }
 
-        public void HumidityControl()
+        private void HumidityControl()
         {
 
             //Humidity(absolute) PID controller
@@ -66,6 +69,15 @@ namespace ClimaticChamberControl_GUI
             ehsum = ehsum + eh;
             yh = (Kph * eh) + (Kih * Tah * ehsum) + (Kdh / Tah * (eh - ehold));
             ehold = eh;
+
+        }
+
+        public void ClimaticControl()
+        {
+            xt = Convert.ToDouble(SOLLtemp);
+            wt = 0;
+            xh = Convert.ToDouble(SOLLhumi);
+            wh = 0;
 
         }
     }

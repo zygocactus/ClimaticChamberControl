@@ -11,25 +11,30 @@ namespace ClimaticChamberControl_GUI
     {
         string[] dataTH;
         string[] da;
-        string temp;
-        string rhumi;
-        string absHumi;
+        public string temp;
+        public string rhumi;
+        public string absHumi;
 
         CCC_MainWindow GUILink
         {
             get;
         }
+        DataStore DATALink
+        {
+            get;
+        }
 
-        public SerialInterfaceUSB(CCC_MainWindow guiLink)//fpr object updating
+        public SerialInterfaceUSB(CCC_MainWindow guiLink, DataStore ds)//for object updating
         {
             GUILink = guiLink;
+            DATALink = ds;
         }
-        
+
 
         SerialPort ComPortUSB = new SerialPort("COM7", 115200, Parity.None, 8, StopBits.One); // ComCort generating
 
 
-        public void actDA()// updating GUI Label
+        public void actDA()//updating GUI Label
         {
 
             while (true)
@@ -52,12 +57,20 @@ namespace ClimaticChamberControl_GUI
                         da = dataTH[i].Split('T');
                         temp = da[1];
                         GUILink.Temperature = temp;
+                        if (DATALink != null)
+                        {
+                            DATALink.Temperature = temp.Replace(',', '.');
+                        }
                     }
                     if (dataTH[i].Substring(0, 1) == "F")
                     {
                         da = dataTH[i].Split('F');
                         rhumi = da[1];
-                        GUILink.Humidity = rhumi;
+                        GUILink.RelativeHumidity = rhumi;
+                        if (DATALink != null)
+                        {
+                            DATALink.relHumidity = rhumi.Replace(',', '.');
+                        }
                     }
                 }
                 //calculate the absolute humidity
@@ -74,14 +87,28 @@ namespace ClimaticChamberControl_GUI
                 double SDD = 6.1078 * Math.Pow(10, ((a * Convert.ToDouble(temp)) / (b + Convert.ToDouble(temp))));
                 double DD = Convert.ToDouble(rhumi) / 100 * SDD;
                 double v = Math.Log10(DD / 6.1078);
-                double TD = b * v / (a - v);
+                double TD = b * v / (a - v);                
                 double AF = Math.Pow(10, 5) * mw / rd * DD / (Convert.ToDouble(temp) + 273.15);
-                double roundOff_AF = Math.Round(AF * 10.0) / 10.0;
+                double roundOff_AF = Math.Round(AF, 1, MidpointRounding.AwayFromZero);
                 GUILink.AbsoluteHumidity = roundOff_AF.ToString(absHumi);
+                if (DATALink != null)
+                {
+                    DATALink.absHumidity = roundOff_AF.ToString(absHumi).Replace(',', '.');
+                    DATALink.DewPoint = Math.Round(TD, 1, MidpointRounding.AwayFromZero).ToString().Replace(',', '.');
+                }
+
+                //if realtive Humidity over 90% -> shut down
+                if (Convert.ToDouble(rhumi) >= 90)
+                {
+                    DATALink.InOperation = false;
+                    DATALink.writeTimer.Stop();//stop writing in parameter text file
+                    System.Windows.MessageBox.Show("System nahe des Taupunktes!\nRegelung wurde abgeschaltet.");
+                }
+
             }
         }
 
-        public void Disconnect()
+        public void Disconnect()//nicht implementiert
         {
             ComPortUSB.Close();
         }
@@ -99,7 +126,6 @@ namespace ClimaticChamberControl_GUI
                 throw ex;
             }
         }
-        //public void Start();
         
     }
 }
