@@ -8,6 +8,9 @@ namespace ClimaticChamberControl_GUI
 {
     class PIDcontroller
     {
+
+        DataStore _ds;
+
         public string SOLLtemp;
         public string SOLLhumi;
 
@@ -74,11 +77,18 @@ namespace ClimaticChamberControl_GUI
 
         public void ClimaticControl()
         {
-            xt = Convert.ToDouble(SOLLtemp);
-            wt = 0;
-            xh = Convert.ToDouble(SOLLhumi);
-            wh = 0;
+            _ds = new DataStore();
 
+            while (_ds.InOperation == true)
+            {
+                xt = Convert.ToDouble(SOLLtemp);
+                wt = 0;
+                xh = Convert.ToDouble(SOLLhumi);
+                wh = 0;
+
+
+
+            }
         }
     }
 }

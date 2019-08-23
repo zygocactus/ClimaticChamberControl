@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ClimaticChamberControl_GUI"
         mc:Ignorable="d"
-        Title="ClimatcChamberControl V0.1.0" Height="450" Width="350">
+        Title="ClimatcChamberControl V0.1.0" Height="450" Width="350"
+        Closing="Window_Closing">
     <Grid>
         <GroupBox x:Name="istwerte" Header="IST" HorizontalAlignment="Center" Height="130" VerticalAlignment="Top" Width="265">
             <Grid>

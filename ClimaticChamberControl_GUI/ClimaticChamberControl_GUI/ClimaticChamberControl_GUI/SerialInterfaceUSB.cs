@@ -4,11 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO.Ports;
+using System.IO;
 
 namespace ClimaticChamberControl_GUI
 {
     class SerialInterfaceUSB
     {
+        public bool connect = false;
         string[] dataTH;
         string[] da;
         public string temp;
@@ -24,10 +26,10 @@ namespace ClimaticChamberControl_GUI
             get;
         }
 
-        public SerialInterfaceUSB(CCC_MainWindow guiLink, DataStore ds)//for object updating
+        public SerialInterfaceUSB(CCC_MainWindow _guiLink, DataStore _ds)//for object updating
         {
-            GUILink = guiLink;
-            DATALink = ds;
+            GUILink = _guiLink;
+            DATALink = _ds;
         }
 
 
@@ -36,14 +38,28 @@ namespace ClimaticChamberControl_GUI
 
         public void actDA()//updating GUI Label
         {
-
-            while (true)
+            while (connect == true)
             {
                 string dataraw = "";
                 while (dataraw == "")
                 {
-                    ComPortUSB.NewLine = "DA";
-                    dataraw = ComPortUSB.ReadLine();
+                    try
+                    {
+                        try
+                        {
+                            ComPortUSB.NewLine = "DA";
+                            dataraw = ComPortUSB.ReadLine();
+                        }
+                        catch (InvalidOperationException)
+                        {
+
+                        }
+                    }
+                    catch(IOException)
+                    {
+                        //for Close ComPort, because ReadLine is blocking 
+                    }
+                   
                 }
                 dataTH = dataraw.Split(' ');
 
@@ -56,6 +72,7 @@ namespace ClimaticChamberControl_GUI
                     {
                         da = dataTH[i].Split('T');
                         temp = da[1];
+                        temp = temp.Substring(0, 4);
                         GUILink.Temperature = temp;
                         if (DATALink != null)
                         {
@@ -66,10 +83,13 @@ namespace ClimaticChamberControl_GUI
                     {
                         da = dataTH[i].Split('F');
                         rhumi = da[1];
+                        rhumi = rhumi.Substring(0, 4);
                         GUILink.RelativeHumidity = rhumi;
                         if (DATALink != null)
                         {
                             DATALink.relHumidity = rhumi.Replace(',', '.');
+                            //if ("D".IndexOf(rhumi) < 0)
+                            //    DATALink.relHumidity = rhumi.Replace('D', ' ');
                         }
                     }
                 }
