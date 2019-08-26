@@ -151,6 +151,6 @@ namespace ClimaticChamberControl_GUI
                     log.Debug("[{0}] - Modbus interface on comport={1} will not be closed because it's used by other modbus devices.", currentMethod, comPort);
                 }
             }
-        }        
+        }
     }
 }

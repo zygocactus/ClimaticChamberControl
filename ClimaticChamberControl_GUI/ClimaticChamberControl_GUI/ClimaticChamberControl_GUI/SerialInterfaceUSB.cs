@@ -11,11 +11,13 @@ namespace ClimaticChamberControl_GUI
     class SerialInterfaceUSB
     {
         public bool connect = false;
+        //static SerialPort ComPortUSB;
         string[] dataTH;
         string[] da;
         public string temp;
         public string rhumi;
         public string absHumi;
+        public string comPortNameUSB;
 
         CCC_MainWindow GUILink
         {
@@ -31,10 +33,9 @@ namespace ClimaticChamberControl_GUI
             GUILink = _guiLink;
             DATALink = _ds;
         }
-
-
-        SerialPort ComPortUSB = new SerialPort("COM7", 115200, Parity.None, 8, StopBits.One); // ComCort generating
-
+        
+        SerialPort ComPortUSB = new SerialPort(); // ComCort generating
+        
 
         public void actDA()//updating GUI Label
         {
@@ -135,6 +136,13 @@ namespace ClimaticChamberControl_GUI
 
         public void Connect()
         {
+            //ComPort properties
+            ComPortUSB.PortName = comPortNameUSB;
+            ComPortUSB.BaudRate = 115200;
+            ComPortUSB.Parity = Parity.None;
+            ComPortUSB.DataBits = 8;
+            ComPortUSB.StopBits = StopBits.One;
+
             try
             {
                 ComPortUSB.ReadTimeout = 500;     //Wartezeit (Timeout Zeit) (in ms) auf Antwort bevor der Lesevorgang abgebrochen wird

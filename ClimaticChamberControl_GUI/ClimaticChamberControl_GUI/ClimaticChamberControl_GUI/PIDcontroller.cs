@@ -11,8 +11,10 @@ namespace ClimaticChamberControl_GUI
 
         DataStore _ds;
 
-        public string SOLLtemp;
-        public string SOLLhumi;
+        public double SOLLtemp;
+        public double SOLLhumi;
+        public double ISTtempChiller;
+        public double SOLLtempChiller;
 
         
         //general equation
@@ -35,7 +37,7 @@ namespace ClimaticChamberControl_GUI
         double wt;//actual value
         double xt;//set value
         double yt;//actuating value
-        double Tat;//sampling time
+        double Tat = 1;//sampling time in s
         double Kpt;//P coefficient
         double Kit;//I coefficient
         double Kdt;//D coefficient
@@ -46,7 +48,7 @@ namespace ClimaticChamberControl_GUI
         double wh;//actual value
         double xh;//set value
         double yh;//actuating value
-        double Tah;//sampling time
+        double Tah = 1;//sampling time in s
         double Kph;//P coefficient
         double Kih;//I coefficient
         double Kdh;//D coefficient
@@ -81,13 +83,12 @@ namespace ClimaticChamberControl_GUI
 
             while (_ds.InOperation == true)
             {
-                xt = Convert.ToDouble(SOLLtemp);
+                xt = SOLLtemp;
                 wt = 0;
-                xh = Convert.ToDouble(SOLLhumi);
+                xh = SOLLhumi;
                 wh = 0;
 
-
-
+                
             }
         }
     }

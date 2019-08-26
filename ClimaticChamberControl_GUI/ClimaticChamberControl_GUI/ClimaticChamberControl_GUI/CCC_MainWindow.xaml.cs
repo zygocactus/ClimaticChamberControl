@@ -30,7 +30,7 @@ namespace ClimaticChamberControl_GUI
     public partial class CCC_MainWindow : Window
     {
         SerialInterfaceUSB _siusb;
-        ModbusConnectionManager _simodbus;
+        ModbusInterface_Base _mbInterface;
         DataStore _ds;
         PIDcontroller _pid;
 
@@ -49,7 +49,9 @@ namespace ClimaticChamberControl_GUI
 
 
         private void Connect_Click(object sender, EventArgs e)
-        {            
+        {
+
+            _siusb.comPortNameUSB = "COM7";
             try
             {
                 _siusb.connect = true;
@@ -60,7 +62,7 @@ namespace ClimaticChamberControl_GUI
                     thrUSB.Start();
                     startThreadactDA = true;
                 }
-                InitChiller();
+                //InitChiller();
                 Connect.IsEnabled = false;
                 Start.IsEnabled = true;
                 Stop.IsEnabled = true;
@@ -74,7 +76,11 @@ namespace ClimaticChamberControl_GUI
         {
             if (SollTemp.Text.ToString() == "")
             {
-                System.Windows.MessageBox.Show("Es müssen noch SOLL-Werte gesetzt werden.");
+                MessageBox.Show(string.Format("Es müssen noch SOLL-Werte gesetzt werden."), "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+            if (SaveLocation.Text.ToString() == "")
+            {
+                MessageBox.Show(string.Format("Es muss noch ein Pfad gewählt werden."), "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
             else
             {
@@ -83,8 +89,8 @@ namespace ClimaticChamberControl_GUI
                 SollabsHumi.IsEnabled = false;
                 _ds.GenerateFile();
                 _ds.StoreDATA();
-                _pid.SOLLtemp = SollTemp.Text.ToString();
-                _pid.SOLLhumi = SollabsHumi.Text.ToString();
+                _pid.SOLLtemp = Convert.ToDouble(SollTemp.Text);
+                _pid.SOLLhumi = Convert.ToDouble(SollabsHumi.Text);
                 Thread thrCC = new Thread(new ThreadStart(_pid.ClimaticControl));
                 if (startThreadClimaticControl == false)
                 {
@@ -121,7 +127,9 @@ namespace ClimaticChamberControl_GUI
         private static void OpenExplorer(string path)
         {
             if (Directory.Exists(path))
+            {
                 System.Diagnostics.Process.Start("explorer.exe", path);
+            }
         }
 
         public string Temperature
@@ -133,9 +141,13 @@ namespace ClimaticChamberControl_GUI
             set
             {
                 if (temp.Dispatcher.CheckAccess())
+                {
                     this.temp.Content = value;
+                }
                 else
+                {
                     Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Background,new Action(() => this.temp.Content = value));
+                }
             }
         }
         public string RelativeHumidity
@@ -147,9 +159,13 @@ namespace ClimaticChamberControl_GUI
             set
             {
                 if (rhumi.Dispatcher.CheckAccess())
+                {
                     this.rhumi.Content = value;
+                }
                 else
+                {
                     Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(() => this.rhumi.Content = value));
+                }
             }
         }
         public string AbsoluteHumidity
@@ -161,9 +177,13 @@ namespace ClimaticChamberControl_GUI
             set
             {
                 if (abshumi.Dispatcher.CheckAccess())
-                    this.abshumi.Content = value;
+                {  
+                this.abshumi.Content = value;
+                }
                 else
+                {
                     Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(() => this.abshumi.Content = value));
+                }
             }
         }
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -174,11 +194,12 @@ namespace ClimaticChamberControl_GUI
             //e.Cancel = true;
         }
 
+
         ////////////NatinalLabChiller////////////
         private static Logger log = LogManager.GetCurrentClassLogger();
 
         byte _modbusAddress = 0;
-        
+
         private void InitChiller()
         {
             string currentMethod = "Init";
@@ -187,10 +208,10 @@ namespace ClimaticChamberControl_GUI
                 // close current interface if already connected
                 try
                 {
-                    if (_simodbus != null)
+                    if (_mbInterface != null)
                     {
-                        ModbusConnectionManager.Instance.CloseModbusInterface(_modbusAddress, _simodbus);
-                        _simodbus = null;
+                        ModbusConnectionManager.Instance.CloseModbusInterface(_modbusAddress, _mbInterface);
+                        _mbInterface = null;
                     }
                 }
                 catch (Exception ex)
@@ -199,20 +220,21 @@ namespace ClimaticChamberControl_GUI
                 }
 
                 _modbusAddress = 1;
-                string comPortName = "COM1";
+                string comPortNameModbus = "COM1";
 
-                _simodbus = ModbusConnectionManager.Instance.GetModbusInterface(_modbusAddress, comPortName, 9600, 8, System.IO.Ports.StopBits.One, System.IO.Ports.Parity.None, 150, 150);
+                _mbInterface = ModbusConnectionManager.Instance.GetModbusInterface(_modbusAddress, comPortNameModbus, 9600, 8, System.IO.Ports.StopBits.One, System.IO.Ports.Parity.None, 150, 150);
 
-                if (_simodbus.IsConnected)
+                if (_mbInterface.IsConnected)
                 {
                     var workTemp = GetWorkingTemperature();
+                    _pid.ISTtempChiller = Convert.ToDouble(workTemp);
                     var bathTemp = GetBathTemperature();
 
                     var controller_status = GetControllerStatus();
 
                     log.Info("[{0}] - NationalLab: bath temperature={1}°C  working temperature={2}°C   controller_status={3}", currentMethod, bathTemp, workTemp, controller_status);
 
-                    double settingWorkingTemperature = 18.0;
+                    double settingWorkingTemperature = 18.0;//SOLLtempChiller;
                     SetWorkingTemperature(settingWorkingTemperature);
 
                     workTemp = GetWorkingTemperature();
@@ -237,7 +259,7 @@ namespace ClimaticChamberControl_GUI
 
         void CheckConnectionState()
         {
-            if (_simodbus == null || _simodbus.IsConnected == false)
+            if (_mbInterface == null || _mbInterface.IsConnected == false)
             {
                 throw new Exception("Connection to cooling device not available.");
             }
@@ -257,7 +279,7 @@ namespace ClimaticChamberControl_GUI
             int status = -1;
             try
             {
-                var ret = _simodbus.ReadHoldingRegisters(_modbusAddress, 0x20F, 1);
+                var ret = _mbInterface.ReadHoldingRegisters(_modbusAddress, 0x20F, 1);
                 status = ret[0];
             }
             catch (Exception ex)
@@ -277,7 +299,7 @@ namespace ClimaticChamberControl_GUI
             double retTemp = 0;
             try
             {
-                var retData = _simodbus.ReadHoldingRegisters(_modbusAddress, 0x200, 1);
+                var retData = _mbInterface.ReadHoldingRegisters(_modbusAddress, 0x200, 1);
                 retTemp = retData[0] / 10.0;
             }
             catch (Exception ex)
@@ -296,7 +318,7 @@ namespace ClimaticChamberControl_GUI
             double retTemp = 0;
             try
             {
-                var retData = _simodbus.ReadHoldingRegisters(_modbusAddress, 0x208, 1);
+                var retData = _mbInterface.ReadHoldingRegisters(_modbusAddress, 0x208, 1);
                 retTemp = retData[0] / 10.0;
             }
             catch (Exception ex)
@@ -313,7 +335,7 @@ namespace ClimaticChamberControl_GUI
             CheckConnectionState();
 
             ushort val = Convert.ToUInt16(workingTemperature * 10.0);
-            _simodbus.WriteSingleRegister(_modbusAddress, 0x2802, val);
+            _mbInterface.WriteSingleRegister(_modbusAddress, 0x2802, val);
             RecalculateInternalChecksum();
         }
 
@@ -323,22 +345,9 @@ namespace ClimaticChamberControl_GUI
         {
             CheckConnectionState();
             // just write to address 0x039B to start the checksum calculation
-            _simodbus.WriteSingleRegister(_modbusAddress, 0x039B, 1);
+            _mbInterface.WriteSingleRegister(_modbusAddress, 0x039B, 1);
         }
 
-
-
-
-        private void button_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                InitChiller();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(string.Format("Error: {0}", ex.Message), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
+        
     }
 }

@@ -124,24 +124,6 @@
   <ItemGroup>
     <None Include="Resources\WL.png" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\ModbusIterfaceLib.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\MiscLib.dll" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\ModbusInterfaceLib.dll" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Newtonsoft.Json.dll" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\NLog.dll" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\NModbus4.dll" />
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
