@@ -11,7 +11,7 @@ namespace ClimaticChamberControl_GUI
     class SerialInterfaceUSB
     {
         public bool connect = false;
-        //static SerialPort ComPortUSB;
+        public bool fillStatus = false;
         string[] dataTH;
         string[] da;
         public string temp;
@@ -27,11 +27,16 @@ namespace ClimaticChamberControl_GUI
         {
             get;
         }
+        PIDcontroller PIDLink
+        {
+            get;
+        }
 
         public SerialInterfaceUSB(CCC_MainWindow _guiLink, DataStore _ds)//for object updating
         {
             GUILink = _guiLink;
             DATALink = _ds;
+            //PIDLink = _pid;
         }
         
         SerialPort ComPortUSB = new SerialPort(); // ComCort generating
@@ -41,6 +46,8 @@ namespace ClimaticChamberControl_GUI
         {
             while (connect == true)
             {
+                begin:
+
                 string dataraw = "";
                 while (dataraw == "")
                 {
@@ -62,10 +69,12 @@ namespace ClimaticChamberControl_GUI
                     }
                    
                 }
+                if (dataraw == "_ready")
+                {
+                    fillStatus = true;
+                    goto begin;
+                }
                 dataTH = dataraw.Split(' ');
-
-
-                //ComPortUSB.WriteLine("on");//Sendetest:an jeden Befehl wird als Ende 'DA' angefügt
 
                 for (int i = 0; i < 2; i++)
                 {
@@ -78,6 +87,7 @@ namespace ClimaticChamberControl_GUI
                         if (DATALink != null)
                         {
                             DATALink.Temperature = temp.Replace(',', '.');
+                            PIDLink.ISTtemp = Convert.ToDouble(temp.Replace(',', '.'));
                         }
                     }
                     if (dataTH[i].Substring(0, 1) == "F")
@@ -89,8 +99,7 @@ namespace ClimaticChamberControl_GUI
                         if (DATALink != null)
                         {
                             DATALink.relHumidity = rhumi.Replace(',', '.');
-                            //if ("D".IndexOf(rhumi) < 0)
-                            //    DATALink.relHumidity = rhumi.Replace('D', ' ');
+                            //PIDLink.ISTrelhumi = Convert.ToDouble(rhumi.Replace(',', '.'));
                         }
                     }
                 }
@@ -112,6 +121,7 @@ namespace ClimaticChamberControl_GUI
                 double AF = Math.Pow(10, 5) * mw / rd * DD / (Convert.ToDouble(temp) + 273.15);
                 double roundOff_AF = Math.Round(AF, 1, MidpointRounding.AwayFromZero);
                 GUILink.AbsoluteHumidity = roundOff_AF.ToString(absHumi);
+                PIDLink.ISTabshumi = Convert.ToDouble(roundOff_AF.ToString(absHumi));
                 if (DATALink != null)
                 {
                     DATALink.absHumidity = roundOff_AF.ToString(absHumi).Replace(',', '.');
@@ -126,6 +136,7 @@ namespace ClimaticChamberControl_GUI
                     System.Windows.MessageBox.Show("System nahe des Taupunktes!\nRegelung wurde abgeschaltet.");
                 }
 
+                fillStatus = false;
             }
         }
 
@@ -154,6 +165,13 @@ namespace ClimaticChamberControl_GUI
                 throw ex;
             }
         }
+
+        public void Send(string Status)
+        {
         
+            ComPortUSB.WriteLine("on");//Sendetest:an jeden Befehl wird als Ende 'DA' angefügt
+
+
+        }
     }
 }

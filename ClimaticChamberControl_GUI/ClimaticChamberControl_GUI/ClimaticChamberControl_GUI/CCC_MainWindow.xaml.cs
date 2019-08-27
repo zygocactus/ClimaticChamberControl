@@ -47,11 +47,13 @@ namespace ClimaticChamberControl_GUI
             //_simodbus = new ModbusConnectionManager();
         }
 
+        string comPortNameModbus;
 
         private void Connect_Click(object sender, EventArgs e)
         {
 
             _siusb.comPortNameUSB = "COM7";
+            comPortNameModbus = "COM9";
             try
             {
                 _siusb.connect = true;
@@ -220,7 +222,6 @@ namespace ClimaticChamberControl_GUI
                 }
 
                 _modbusAddress = 1;
-                string comPortNameModbus = "COM1";
 
                 _mbInterface = ModbusConnectionManager.Instance.GetModbusInterface(_modbusAddress, comPortNameModbus, 9600, 8, System.IO.Ports.StopBits.One, System.IO.Ports.Parity.None, 150, 150);
 
@@ -234,7 +235,7 @@ namespace ClimaticChamberControl_GUI
 
                     log.Info("[{0}] - NationalLab: bath temperature={1}°C  working temperature={2}°C   controller_status={3}", currentMethod, bathTemp, workTemp, controller_status);
 
-                    double settingWorkingTemperature = 18.0;//SOLLtempChiller;
+                    double settingWorkingTemperature = 18.0;//Set Temperature
                     SetWorkingTemperature(settingWorkingTemperature);
 
                     workTemp = GetWorkingTemperature();
@@ -253,9 +254,49 @@ namespace ClimaticChamberControl_GUI
                 log.Error("[{0}] - ex: {1}", currentMethod, ex.Message);
                 throw;
             }
+            //start thread for control settingWorkingTemperature
+            Thread thrChiller = new Thread(new ThreadStart(ChillerControl));
+            thrChiller.Start();
         }
 
+        void ChillerControl()
+        {
+            while (_ds.InOperation == true)
+            {
+                if (_mbInterface.IsConnected)
+                {
+                    var workTemp = GetWorkingTemperature();
+                    _pid.ISTtempChiller = Convert.ToDouble(workTemp);
+                    var bathTemp = GetBathTemperature();
 
+                    var controller_status = GetControllerStatus();
+
+                    double settingWorkingTemperature = _pid.SOLLtempChiller;//Set Temperature
+                    SetWorkingTemperature(settingWorkingTemperature);
+
+                    workTemp = GetWorkingTemperature();
+                    if (Math.Abs(workTemp - settingWorkingTemperature) > 0.1)
+                    {
+                        throw new Exception(string.Format("NationalLab: Error setting working temperature. (value to set: {0}   current value: {1})", settingWorkingTemperature, workTemp));
+                    }
+                }
+                else
+                {
+                    _siusb.connect = false;
+                    _ds.InOperation = false;
+                    SollTemp.IsEnabled = true;
+                    SollabsHumi.IsEnabled = true;
+                    _ds.writeTimer.Stop();//stop writing in parameter text file
+                    Connect.IsEnabled = true;
+                    Start.IsEnabled = false;
+                    Stop.IsEnabled = false;
+                    _siusb.Disconnect();
+                    throw new Exception("Chillerverbindung unterbrochen.\nRegelung beendet.");
+                }
+                System.Threading.Thread.Sleep(100);
+
+            }
+        }
 
         void CheckConnectionState()
         {
