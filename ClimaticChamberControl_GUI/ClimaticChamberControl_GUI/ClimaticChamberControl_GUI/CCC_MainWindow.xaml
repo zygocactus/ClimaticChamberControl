@@ -46,7 +46,7 @@
                 <Label Grid.Column="0" Grid.Row="0" x:Name="label6" Content="Temperatur [°C]:" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                 <TextBox Grid.Column="1" Grid.Row="0" x:Name="SollTemp" Text="30" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="NoWrap"  Height="23" Width="60"/>
                 <Label Grid.Column="0" Grid.Row="1" x:Name="label7" Content="Absolute Luftfeuchte [g/m³]:" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                <TextBox Grid.Column="1" Grid.Row="1" x:Name="SollabsHumi" Text="10" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="NoWrap"  Height="23" Width="60"/>
+                <TextBox Grid.Column="1" Grid.Row="1" x:Name="SollabsHumi" Text="20" HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="NoWrap"  Height="23" Width="60"/>
             </Grid>
         </GroupBox>
 
@@ -54,7 +54,7 @@
         <Button x:Name="Stop" Content="Stop" Click="Stop_Click" IsEnabled="False" HorizontalAlignment="Left" Margin="224,349,0,0" VerticalAlignment="Top" Width="80" Height="40"/>
         <Button x:Name="Connect" Click="Connect_Click" Content="Verbinden" HorizontalAlignment="Center" Margin="0,349,0,0" VerticalAlignment="Top" Width="80" Height="40"/>
         <Label x:Name="label8" Content="Speicherort:" HorizontalAlignment="Left" Margin="38,281,0,0" VerticalAlignment="Top"/>
-        <TextBox x:Name="SaveLocation" HorizontalAlignment="Left" Text="" Height="23" Margin="38,307,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="233"/>
+        <TextBox x:Name="SaveLocation" HorizontalAlignment="Left" Text="C:\Users\Franz.Janderski\Desktop" Height="23" Margin="38,307,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="233"/>
         <Button x:Name="FileExplorer" Click="FileExplorer_Click" Content="..." HorizontalAlignment="Left" Margin="276,307,0,0" VerticalAlignment="Top" Width="28" Height="23"/>
 
     </Grid>

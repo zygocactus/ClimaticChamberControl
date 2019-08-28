@@ -27,16 +27,16 @@ namespace ClimaticChamberControl_GUI
         {
             get;
         }
-        PIDcontroller PIDLink
+        public PIDcontroller PIDLink
         {
             get;
+            set;
         }
 
         public SerialInterfaceUSB(CCC_MainWindow _guiLink, DataStore _ds)//for object updating
         {
             GUILink = _guiLink;
             DATALink = _ds;
-            //PIDLink = _pid;
         }
         
         SerialPort ComPortUSB = new SerialPort(); // ComCort generating
@@ -142,6 +142,7 @@ namespace ClimaticChamberControl_GUI
 
         public void Disconnect()//nicht implementiert
         {
+            ComPortUSB.WriteLine("shutdown");
             ComPortUSB.Close();
         }
 
@@ -156,7 +157,7 @@ namespace ClimaticChamberControl_GUI
 
             try
             {
-                ComPortUSB.ReadTimeout = 500;     //Wartezeit (Timeout Zeit) (in ms) auf Antwort bevor der Lesevorgang abgebrochen wird
+                ComPortUSB.ReadTimeout = 1000;     //Wartezeit (Timeout Zeit) (in ms) auf Antwort bevor der Lesevorgang abgebrochen wird
                 ComPortUSB.Open();
             }
             catch (Exception ex)
@@ -169,7 +170,7 @@ namespace ClimaticChamberControl_GUI
         public void Send(string Status)
         {
         
-            ComPortUSB.WriteLine("on");//Sendetest:an jeden Befehl wird als Ende 'DA' angefügt
+            ComPortUSB.WriteLine(Status);//Sendetest:an jeden Befehl wird als Ende 'DA' angefügt
 
 
         }

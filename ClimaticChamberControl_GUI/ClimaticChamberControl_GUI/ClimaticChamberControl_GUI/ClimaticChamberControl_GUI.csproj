@@ -79,7 +79,7 @@
     </ApplicationDefinition>
     <Compile Include="DataStore.cs" />
     <Compile Include="PIDcontroller.cs" />
-    <Compile Include="SerialInterfaceModbus.cs" />
+    <Compile Include="ModbusConnectionManager.cs" />
     <Compile Include="SerialInterfaceUSB.cs" />
     <Page Include="CCC_MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

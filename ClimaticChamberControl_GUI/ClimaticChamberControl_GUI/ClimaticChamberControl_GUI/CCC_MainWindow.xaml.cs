@@ -41,10 +41,11 @@ namespace ClimaticChamberControl_GUI
         {
             InitializeComponent();
             _ds = new DataStore();
-            _siusb = new SerialInterfaceUSB(this, _ds);
-            _ds.InOperation = false;
             _pid = new PIDcontroller();
-            //_simodbus = new ModbusConnectionManager();
+            _siusb = new SerialInterfaceUSB(this, _ds);
+            _siusb.PIDLink = _pid;
+            _pid.Siusb = _siusb;
+            _ds.InOperation = false;
         }
 
         string comPortNameModbus;
@@ -275,10 +276,6 @@ namespace ClimaticChamberControl_GUI
                     SetWorkingTemperature(settingWorkingTemperature);
 
                     workTemp = GetWorkingTemperature();
-                    if (Math.Abs(workTemp - settingWorkingTemperature) > 0.1)
-                    {
-                        throw new Exception(string.Format("NationalLab: Error setting working temperature. (value to set: {0}   current value: {1})", settingWorkingTemperature, workTemp));
-                    }
                 }
                 else
                 {
