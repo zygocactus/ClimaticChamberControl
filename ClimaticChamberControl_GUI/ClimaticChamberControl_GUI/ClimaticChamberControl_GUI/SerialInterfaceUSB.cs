@@ -62,6 +62,10 @@ namespace ClimaticChamberControl_GUI
                         {
 
                         }
+                        catch (Exception)
+                        {
+
+                        }
                     }
                     catch(IOException)
                     {
@@ -87,7 +91,7 @@ namespace ClimaticChamberControl_GUI
                         if (DATALink != null)
                         {
                             DATALink.Temperature = temp.Replace(',', '.');
-                            PIDLink.ISTtemp = Convert.ToDouble(temp.Replace(',', '.'));
+                            PIDLink.ISTtemp = Convert.ToDouble(temp);
                         }
                     }
                     if (dataTH[i].Substring(0, 1) == "F")
@@ -135,8 +139,6 @@ namespace ClimaticChamberControl_GUI
                     DATALink.writeTimer.Stop();//stop writing in parameter text file
                     System.Windows.MessageBox.Show("System nahe des Taupunktes!\nRegelung wurde abgeschaltet.");
                 }
-
-                fillStatus = false;
             }
         }
 
@@ -170,7 +172,7 @@ namespace ClimaticChamberControl_GUI
         public void Send(string Status)
         {
         
-            ComPortUSB.WriteLine(Status);//Sendetest:an jeden Befehl wird als Ende 'DA' angefügt
+            ComPortUSB.WriteLine(Status);//an jeden Befehl wird als Ende 'DA' angefügt
 
 
         }

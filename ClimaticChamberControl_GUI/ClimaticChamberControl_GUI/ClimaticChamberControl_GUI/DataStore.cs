@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
-using System.Windows.Forms;
 
 namespace ClimaticChamberControl_GUI
 {
@@ -32,7 +31,7 @@ namespace ClimaticChamberControl_GUI
         public string relHumidity;
         public string absHumidity;
 
-        public Timer writeTimer = new Timer();       
+        public System.Windows.Threading.DispatcherTimer writeTimer = new System.Windows.Threading.DispatcherTimer();       
 
 
         public void GenerateFile()
@@ -44,7 +43,7 @@ namespace ClimaticChamberControl_GUI
                 filename = Path + "/" + Date + "_CCC_Parameters.txt";
                 if (File.Exists(filename))
                 {
-                    if (MessageBox.Show("Datei ersetzen?", "Datei exsitiert bereits!", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                    if (System.Windows.Forms.MessageBox.Show("Datei ersetzen?", "Datei exsitiert bereits!", System.Windows.Forms.MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
                     {
                         File.Delete(filename);
                         using (StreamWriter sw = File.CreateText(filename))
@@ -75,9 +74,9 @@ namespace ClimaticChamberControl_GUI
 
         }
         
-        public void StoreDATA()//write parameters in new Line 1 time in a minute
+        public void StoreDATA()//write parameters in new Line 1 and start Writer
         {
-            writeTimer.Interval = 6000; //intervall in ms
+            writeTimer.Interval = new TimeSpan(0,1,0); //intervall in (h,min,s)
             if (FirstTimerEvent == true)
             {
                 writeTimer.Tick += new EventHandler(writeTimer_Tick);
@@ -88,6 +87,7 @@ namespace ClimaticChamberControl_GUI
             {
                 Time = DateTime.Now.ToString("HH:mm:ss");
                 Date = DateTime.Now.ToString("yyyy-MM-dd");
+
                 using (StreamWriter sw = File.AppendText(filename))
                 {
                     sw.WriteLine("1," + Date + " " + Time + "," + Temperature + "," + relHumidity + "," + DewPoint + "," + absHumidity);

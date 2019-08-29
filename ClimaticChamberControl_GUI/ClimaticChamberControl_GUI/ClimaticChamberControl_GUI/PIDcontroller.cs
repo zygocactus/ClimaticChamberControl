@@ -2,22 +2,24 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Timers;
-using System.Windows.Forms;
 
 namespace ClimaticChamberControl_GUI
 {
     class PIDcontroller
     {
-        DataStore _ds;
+        private DataStore _ds;
 
         public SerialInterfaceUSB Siusb
         {
             get;
             set;
         }
+        public PIDcontroller(DataStore ds)//for object updating
+        {
+            _ds = ds;
+        }
+
+       private System.Windows.Threading.DispatcherTimer CCTimer = new System.Windows.Threading.DispatcherTimer();
 
         public double SOLLtemp;       //from CCC_MainWindow
         public double SOLLhumi;        //from CCC_MainWindow
@@ -28,6 +30,7 @@ namespace ClimaticChamberControl_GUI
         //public double ISTrelhumi;         //from SerialInterfaceUSB
 
         public string Status = "shutdown";//shutdown, fill, on, off
+        string StatusOld;
         int i = 0;//
 
         //general equation
@@ -46,9 +49,9 @@ namespace ClimaticChamberControl_GUI
         double xt;          //set value
         double yt;          //actuating value
         double Tat = 1;     //sampling time in s
-        double Kpt;         //P coefficient
-        double Kit;         //I coefficient
-        double Kdt;         //D coefficient
+        double Kpt = 1;         //P coefficient
+        double Kit = 0;         //I coefficient
+        double Kdt = 0;         //D coefficient
         double Kita;
         double Kdta;
         //for humidity controll
@@ -59,9 +62,9 @@ namespace ClimaticChamberControl_GUI
         double xh;          //set value
         double yh;          //actuating value
         double Tah = 1;     //sampling time in s
-        double Kph;         //P coefficient
-        double Kih;         //I coefficient
-        double Kdh;         //D coefficient
+        double Kph = 1;         //P coefficient
+        double Kih = 0;         //I coefficient
+        double Kdh = 0;         //D coefficient
         double Kiha;
         double Kdha;
 
@@ -82,7 +85,7 @@ namespace ClimaticChamberControl_GUI
         private void HumidityControl()
         {            
             wh = ISTabshumi;
-            xt = SOLLhumi;
+            xh = SOLLhumi;
 
             //Humidity(absolute) PID controller
             eh = wh - xh;
@@ -94,8 +97,6 @@ namespace ClimaticChamberControl_GUI
 
         public void ClimaticControl()
         {
-            _ds = new DataStore();
-
             Kita = Kit * Tat;
             Kdta = Kdt / Tat;
             Kiha = Kih * Tah;
@@ -105,38 +106,40 @@ namespace ClimaticChamberControl_GUI
             {
                 Status = "fill";
                 Siusb.Send(Status);
-                i = 1;
                 //wait for "_ready" from MCU
-                while (Siusb.fillStatus == false)
+                while (Siusb.fillStatus != true)
                 {
-                    //stop waiting
-                    System.Threading.Thread.Sleep(100);
+                    System.Threading.Thread.Sleep(10);
                 }
                 Status = "off";
                 Siusb.Send(Status);
-                //Siusb.fillStatus = false;
+                i = 1;
             }
-
-            int CCInterval = 600 * 1;//1min * x
-            System.Windows.Forms.Timer CCTimer = new System.Windows.Forms.Timer();
-            CCTimer.Interval = CCInterval;
+            Siusb.fillStatus = false;
+            
+            CCTimer.Interval = new TimeSpan(0,0,1);//intervall in (h,min,s)
             CCTimer.Tick += new EventHandler(CCTimer_Tick);
-            CCTimer.Start();            
+            CCTimer.Start();        
         }
 
         void CCTimer_Tick(object sender, EventArgs e)
         {
-            if (i == 50)//fill up the cylinder all int FillInterval min * 5
+            if (_ds.InOperation == true)
             {
-                Status = "fill";
-                Siusb.Send(Status);
-                System.Threading.Thread.Sleep(20);
-                i = 1;
-            } 
+                if (i == 60)//fill up the cylinder all int FillInterval * 5
+                {
+                    Status = "fill";
+                    Siusb.Send(Status);
+                    //wait for "_ready" from MCU
+                    while (Siusb.fillStatus != true)
+                    {
+                        System.Threading.Thread.Sleep(10);
+                    }
+                    Siusb.Send(StatusOld);
+                    i = 1;
+                }
 
-            while (_ds.InOperation == true)
-            {
-                //double chillerOffset = 5;//in Grad Celsius
+                //double chillerOffset = 10;//in Grad Celsius
                 //TemperatureControl();
                 //if (yh > 0)//cooling
                 //{
@@ -151,19 +154,22 @@ namespace ClimaticChamberControl_GUI
                 //    SOLLtempChiller = yh;
                 //}
 
-                double humiOffset = 2;//in g/m^3, because high downtime
+                double humiOffset = -2;//in g/m^3, because high downtime
                 HumidityControl();
                 if (yh >= humiOffset)
                 {
                     Status = "off";
-                    System.Threading.Thread.Sleep(20);
+                    StatusOld = Status;
+                    Siusb.Send(Status);
+                    System.Threading.Thread.Sleep(10);
                 }
                 if (yh < humiOffset)
                 {
                     Status = "on";
-                    System.Threading.Thread.Sleep(20);
+                    StatusOld = Status;
+                    Siusb.Send(Status);
+                    System.Threading.Thread.Sleep(10);
                 }
-                Siusb.Send(Status);
                 i++;
             }
         }

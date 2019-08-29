@@ -17,7 +17,7 @@ using System.Windows.Threading;
 using System.Diagnostics;
 using System.IO;
 using Microsoft.Win32;
-using WinForms = System.Windows.Forms;
+using WinForms = System.Windows.Forms;// for FileExplorer_Click
 
 using NLog;
 using ModbusInterfaceLib;
@@ -41,7 +41,7 @@ namespace ClimaticChamberControl_GUI
         {
             InitializeComponent();
             _ds = new DataStore();
-            _pid = new PIDcontroller();
+            _pid = new PIDcontroller(_ds);
             _siusb = new SerialInterfaceUSB(this, _ds);
             _siusb.PIDLink = _pid;
             _pid.Siusb = _siusb;
@@ -58,10 +58,10 @@ namespace ClimaticChamberControl_GUI
             try
             {
                 _siusb.connect = true;
-                _siusb.Connect();                
-                Thread thrUSB = new Thread(new ThreadStart(_siusb.actDA));
+                _siusb.Connect();
                 if (startThreadactDA == false)
                 {
+                    Thread thrUSB = new Thread(new ThreadStart(_siusb.actDA));
                     thrUSB.Start();
                     startThreadactDA = true;
                 }
@@ -87,17 +87,20 @@ namespace ClimaticChamberControl_GUI
             }
             else
             {
+                _ds.Path = SaveLocation.Text;
                 _ds.InOperation = true;
+                Stop.IsEnabled = true;
+                Start.IsEnabled = false;
                 SollTemp.IsEnabled = false;
                 SollabsHumi.IsEnabled = false;
                 _ds.GenerateFile();
                 _ds.StoreDATA();
                 _pid.SOLLtemp = Convert.ToDouble(SollTemp.Text);
                 _pid.SOLLhumi = Convert.ToDouble(SollabsHumi.Text);
-                Thread thrCC = new Thread(new ThreadStart(_pid.ClimaticControl));
+                
                 if (startThreadClimaticControl == false)
                 {
-                    thrCC.Start();
+                    _pid.ClimaticControl();
                     startThreadClimaticControl = true;
                 }
             }
